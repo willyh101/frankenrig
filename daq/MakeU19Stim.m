@@ -4,11 +4,11 @@ pulseDuration= 5; %ms Stimulation pulse
 TrigDuration = 5; %ms SLM flip command
 stimFreq= 1; % Shouldn't matter but is used
 
-P1=[0.08];%[0.01 0.025 0.05 0.1 .15]; %List of Powers To Use
+P1=[0.055];%[0.01 0.025 0.05 0.1 .15]; %List of Powers To Use
 
 % note: modded this to make all holos get the same number of pulses by
 % default
-stimTypeNumPulse = 10;
+stimTypeNumPulse = 20;
 stimTypeHz = 30;
 
 numHolos=numel(holosToUse);
