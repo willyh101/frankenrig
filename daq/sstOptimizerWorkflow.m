@@ -85,7 +85,7 @@ varsToPass.DistFromCenter = DistFromCenter;
 %% Tuning Rules
 visLog = cellfun(@(x) length(find(diff(x(:,4))>0)),ExpStruct.digitalSweeps);
 
-DAQEpochVis = 3;
+DAQEpochVis = 2;
 startTrial = ExpStruct.EpochEnterSweep{DAQEpochVis};
 try
     endTrial = ExpStruct.EpochEnterSweep{DAQEpochVis+1}-1;
@@ -180,8 +180,8 @@ iterLim = 1e4;
 
 %% Make tuned ensembles
 
-numCellsPerEns = 30;
-numEns = 5;
+numCellsPerEns = 10;
+numEns = 10;
 
 %generate the random Matrix
 startMatrix =zeros([numCellsPerEns,numEns]);
@@ -220,11 +220,19 @@ moduleScores.score =score;
 module{end+1}=moduleScores;
 toc
 
+%% add to holos
+
+
 %% make single cell ensembles
 % sort by osi then select top quantile
+[b,idx] = sort(osi_vals,'descend');
 
+nSingleHolos = 10;
+cells = idx(1:nSingleHolos);
 
-
+holosToUse = num2cell(ensembleMatrix,1);
+holosToUse = cat(2,holosToUse, num2cell(cells));
+holosToUse
 %% Subset final and export
 allMatrix = cat(2, closeTuned, farTuned);%, bigTuned);
 holosToUse = num2cell(allMatrix,1);
@@ -241,7 +249,7 @@ holosToUse
 %% Final and Export
 allMatrix = cat(2,closeTuned,closeUnTuned,farTuned,FarUnTuned);
 holosToUse = num2cell(allMatrix,1);
-
+%%
 holoOptimizer.holosToUse = holosToUse;
 holoOptimizer.varsToPass = varsToPass;
 holoOptimizer.module =module;
@@ -249,7 +257,7 @@ holoOptimizer.module =module;
 ExpStruct.holoOptimizer = holoOptimizer;
 
 %%
-holosToUse = num2cell(finalMatrix,1);
+% holosToUse = num2cell(ensembleMatrix,1);
 
 figure(11)
 clf
@@ -262,3 +270,15 @@ for i=1:numel(holosToUse)
     xlim([0,512*pxToMu])
     ylim([0,512*pxToMu])
 end
+%% 
+for i=1:numel(holosToUse)
+    this_holo = holosToUse{i};
+    prefs(this_holo)'
+    pause
+end
+%% 7 is the winner akak 225
+ExpStruct.isoOriShown = 225;
+ExpStruct.isoOriIdx = 7;
+ExpStruct.smallSize = 10;
+ExpStruct.largeSize = 35;
+ExpStruct.gratingLoc = 'center';
