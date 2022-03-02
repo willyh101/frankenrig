@@ -130,18 +130,20 @@ tuningCurves = bsxfun(@minus, tuningCurves,min(tuningCurves,[],2));
 [~, prefs] = max(tuningCurves, [], 2);
 
 sz=size(meanVals);
-if sz(2)==13;
+if sz(2)==13
     orthos1 = prefs-3;
     orthos1(orthos1<1)=orthos1(orthos1<1)+12;
     
     orthos2 = prefs+3;
     orthos2(orthos2>12)=orthos2(orthos2>12)-12;
+    oris = [nan 0:30:330];
 elseif sz(2)==9
     orthos1 = prefs-2;
     orthos1(orthos1<1)=orthos1(orthos1<1)+8;
     
     orthos2 = prefs+2;
     orthos2(orthos2>8)=orthos2(orthos2>8)-8;
+    oris = [nan 0:45:315];
 else
     disp('ERROR UNEXPECTED SIZE')
 end
@@ -157,10 +159,10 @@ for c=1:numel(prefs)
 end
 
 varsToPass.p_vis_resp =p_vis_resp;
-% varsToPass.OriPref = prefs;
 varsToPass.osi_vals = osi_vals;
-varsToPass.meanOriVals = meanVals; 
-
+varsToPass.meanOriVals = meanVals;
+varsToPass.oris = oris;
+varsToPass.POs = prefs;
 
 %% params to set
 varsToPass.percentSimilar = 50; %how similar can two ensembles b?
@@ -174,7 +176,7 @@ varsToPass.minDistFromCenter = 200;
 scoreFun = @(x,y) checkForTooSimilar(x,y) + avoidHittingCellsToMuch(x)*2 ...
     + scoreDistanceRules(x,y)/5 + prioritizeStimmable(x,y) ...
     + prioritizeVispResp(x,y)*500 + scoreEnsTuning(x,y) + scoreMeanOSI(x,y) ...
-    + scoreDistanceFromCenter(x,y);
+    + scoreDistanceFromCenter(x,y) + scoreCoTuned(x,y);
 
 iterLim = 1e4;
 
@@ -210,6 +212,8 @@ disp(['Ens OSI Score ' num2str(scr) '..... Ens OSIs: ' num2str(ensOSIVals)]);
 disp(['Mean OSI Score ' num2str(scr) '..... each Ens mean OSIs: ' num2str(meanOSIs)]);
 [scr, distFromCenter] = scoreDistanceFromCenter(finalMatrix,varsToPass);
 disp(['Dist from center score: ' num2str(scr) '..... Min Dists: ' num2str(distFromCenter)])
+[scr, percentCoTuned] = scoreCoTuned(finalMatrix,varsToPass);
+disp(['Co-tuned score: ' num2str(scr) '..... Percent co-tuned: ' num2str(percentCoTuned)])
 
 moduleScores.inputs = varsToPass;
 moduleScores.maxDist = mxDist;
