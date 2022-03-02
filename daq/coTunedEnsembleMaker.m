@@ -6,7 +6,7 @@ powers = out.powers;
 % holoRequest.onlinePowerCurve = out;
 refPower = 50/1000;
 [hr]=roiWeightsFromPSTHs(PSTHs,powers,holoRequest,refPower);
-eligibleCells = find(~isnan(hr.roiWeights) & hr.roiWeights<=1); %find(hr.roiWeights==1);
+eligibleCells = find(~isnan(hr.roiWeights) & hr.roiWeights<=2); %find(hr.roiWeights==1);
 ExpStruct.eligibleCells = eligibleCells;
 disp([num2str(numel(eligibleCells)) ' stimmable cells']);
 
@@ -144,15 +144,29 @@ varsToPass.meanOriVals = meanVals;
 varsToPass.oris = oris;
 varsToPass.POs = prefs;
 
+%% view some osis
+
+valsToUse = find((osi_vals > 0.5) & (osi_vals < 1));
+theseCells = randsample(valsToUse, 16);
+disp([num2str(numel(valsToUse)) ' cells'])
+
+figure(66)
+clf
+for i=1:16
+    thisCell = theseCells(i);
+    y = meanVals(thisCell,2:end);
+    err = semVals(thisCell,2:end);
+    subplot(4,4,i)
+    errorbar(oris(2:end),y,err)
+    title(['Cell #' num2str(thisCell) ' with OSI = ' num2str(osi_vals(thisCell))])
+    xlim([0 max(oris)])
+end
+    
+
+
 %% params to set
-varsToPass.percentSimilar = 50; %how similar can two ensembles b?
-varsToPass.minSep = 30; %min separation of any two targets
-varsToPass.targetRange = [100 1000];  %distance range based on bounding box (does not work with infs)
-varsToPass.meanOSIrange = [0.75 1]; % will optimize to use individual cells in this range
-varsToPass.ensOSIRange = [0.75 1]; % will optimize to make ensembles in this range
-varsToPass.pVisLim = 0.05; % will peanalize pVis higher than this value
+varsToPass.percentSimilar = 50;
 varsToPass.minDistFromCenter = 200;
-varsToPass.nCellsRange = [10 20];
 
 scoreFun = @(x,y) checkForTooSimilar(x,y) + avoidHittingCellsToMuch(x)*2 ...
     + prioritizeStimmable(x,y) + scoreDistanceFromCenter(x,y) + scoreCoTuned(x,y);
@@ -179,7 +193,8 @@ holosToUse{1} = cellsToUse;
 %% then use optimizer to get best cases
 numEns = 1;
 
-cellRange = varsToPass.nCellsRange(1):varsToPass.nCellsRange(2);
+cellRange = 5:count;
+
 clear allScores allEns
 c=0;
 for j=cellRange
@@ -191,7 +206,7 @@ for j=cellRange
     [finalMatrix, score] = genericGD(startMatrix,iterLim,@updateMatrixFromList,scoreFun,varsToPass,0);
     allEns{c} = finalMatrix;
     allScores(c) = score;
-    disp(score)
+    disp([num2str(j) ' cells in ensemble, score: ' num2str(score)])
 end
 
 normScores = allScores./sqrt(cellRange);
@@ -202,8 +217,9 @@ disp('These are your best ensemble sizes...')
 disp(cellRange(sidx))
 
 %%
-numEns = 3;
+numEns = 1;
 szEns = cellRange(sidx(1:3));
+szEns = [szEns 10 3];
 
 clear allScores allEns
 c=0;
@@ -242,3 +258,10 @@ for i=1:numel(holosToUse)
     xlim([0,512*pxToMu])
     ylim([0,512*pxToMu])
 end
+
+%%
+ExpStruct.isoOriShown = 90;
+ExpStruct.sizes = [10 20 50];
+ExpStruct.contrast = 100;
+ExpStruct.oris = [nan 90 0];
+ExpStruct.gratingLoc = 'center';
