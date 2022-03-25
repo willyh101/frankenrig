@@ -47,7 +47,9 @@ totalCells =size(holoRequest.targets,1);
 disp(['Total Cells Detected ' num2str(totalCells)]);
 cellsToUse = 1:totalCells;
 elseif iscell(cellsToUse)
-    totalCells = numel(unique([cellsToUse{:}]));
+%     totalCells = numel(unique([cellsToUse{:}]));
+    temp2 = cellsToUse';
+    totalCells = numel(unique(cat(1,temp2{:})));
     disp(['Using ' num2str(totalCells) ' Cells']);
 else
     totalCells = numel(cellsToUse);

@@ -2,9 +2,9 @@ load('T:\live2p_out\data.mat')
 
 out.PSTHs = onlinePSTHs;
 out.onlineTraces = onlineTraces;
-out.onlineTraceLengths = onlineTrialLengths
+out.onlineTraceLengths = onlineTrialLengths;
 %%
-ExpStruct.orientationData50 = out;
+ExpStruct.orientationData = out
 
 %%
 ExpStruct.spikeTest = out
