@@ -12,7 +12,7 @@ load(locations.PowerCalib,'LaserPower');
 %% Simple request mW and measure power
 
 PowerAsk = 100; % note this is in mW
-DE = 0.623; % enter DE of requested hologram
+DE = .6229; % enter DE of requested hologram
 
 eomOffset = -0.15;
 Fs = s.Rate;
