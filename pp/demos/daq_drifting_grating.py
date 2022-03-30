@@ -14,7 +14,7 @@ mon.setSizePix([1600,1200])
 mon.setDistance(10)
 mon.setWidth(19.7)
 
-win = visual.Window(size=[1920,1080], units='deg', screen=0, allowGUI=False, monitor=mon)
+win = visual.Window(size=[1600,1200], units='deg', screen=1, allowGUI=False, monitor=mon)
 
 stim = grating.GratingStim(
     win, 
@@ -48,10 +48,11 @@ def display_grating():
 #         if keys in ['escape', 'q']:
 #             core.quit()
             
-with ni.Task() as task:
-    task = ni.Task()
-    task.di_channels.add_di_chan('Dev....')
-    task.register_signal_event(Signal.START_TRIGGER, display_grating)
-    task.read()
+task = ni.Task()
+task.ai_channels.add_ai_voltage_chan('Dev2/ai2')
+task.triggers.start_trigger.cfg_dig_edge_start_trig('/Dev2/PFI1')
+task.register_signal_event(Signal.START_TRIGGER, display_grating)
+task.start()
+task.read()
 
 win.close()
