@@ -25,13 +25,13 @@ void loop() {
   
 if ((PINH & (B00000001))==1){
   PORTE = (1<<PD4);    //Pin 2 of portd as now the logic value 1
-  delayMicroseconds(10); //5 //16
+  delayMicroseconds(5); //5 //16
   PORTE = (0<<PD4);    //Pin 2 of portd as now the logic value 0
-  delayMicroseconds(46); //51 //34
+  delayMicroseconds(51); //51 //34
   PORTE = (1<<PD4);    //Pin 2 of portd as now the logic value 1
-  delayMicroseconds(30); //15 //32
+  delayMicroseconds(15); //15 //32
   PORTE = (0<<PD4);    //Pin 2 of portd as now the logic value 0
-  delayMicroseconds(46);  //51 //34
+  delayMicroseconds(51);  //51 //34
   PORTE = (1<<PD4);    //Pin 2 of portd as now the logic value 1
 }
 
