@@ -1,5 +1,3 @@
-function makeVisStim()
-
 global ExpStruct Exp_Defaults
 
 visStartTime = 1000;
