@@ -6,7 +6,8 @@ import sys
 sys.path.append('m:/will/rigcode/pp')
 
 from vispy.monitors import ipad_monitor
-from vispy.utils import display_blank_trial, display_grating, make_all_combos
+from vispy.utils import display_blank_trial, display_grating, make_all_combos, int2bits
+from vispy.io import make_standard_config, PT_TRIG
 
 # GENERAL SETTINGS
 stim_time = 1
@@ -21,24 +22,10 @@ size = 50
 tf = 1
 blanks = 1
 
-# trigger pt (in task)
-# NI-6003
-ai = 'Dev2/ai0'
-pfi = '/Dev2/PFI1'
+# daq settings
 sample_rate = 1000
 timeout = 30
-
-# notify daq (out task)
-digital_outs = {
-    'si_flip': 'Dev2/Port0/Line4',
-    'daq_flip': 'Dev2/Port0/Line1',
-    'daq_trig': 'Dev2/Port0/Line5',
-    'si_trig': 'Dev2/Port0/Line2'
-}
-
-# make generic output signals
-flip_on = [True, True, False, False]
-flip_off = [False, False, False, False]
+digital_outs, flip_on, blank, pulse_on, pulse_off = make_standard_config()
 
 mon, win = ipad_monitor()
 
@@ -58,15 +45,15 @@ stim_record = []
 with ni.Task() as trig_task, ni.Task() as out_task:
     
     # setup triggers for psychopy
-    trig_task.ai_channels.add_ai_voltage_chan(ai)
-    trig_task.triggers.start_trigger.cfg_dig_edge_start_trig(pfi)
+    trig_task.ai_channels.add_ai_voltage_chan(PT_TRIG['ai'])
+    trig_task.triggers.start_trigger.cfg_dig_edge_start_trig(PT_TRIG['pfi'])
     trig_task.timing.cfg_samp_clk_timing(sample_rate, samps_per_chan=2)
 
     # setup digital outputs
-    for do in digital_outs.values():
+    for do in digital_outs:
         out_task.do_channels.add_do_chan(do)
     out_task.start()
-    
+
     # main loop
     tr_num=0
     for tr_num in range(n_trials):
@@ -85,10 +72,13 @@ with ni.Task() as trig_task, ni.Task() as out_task:
         else:
             out_task.write(flip_on)
             display_grating(stim, win)
-            out_task.write(flip_off)
+            out_task.write(blank)
         
         # flip a grey screen
         win.flip()
+        
+        # stim the daq with the appropriate info
+        # binvec = int2bits()
 
         # record the stim into the record
         stim_record.append(rand_grating)
@@ -107,5 +97,6 @@ with ni.Task() as trig_task, ni.Task() as out_task:
     
     # flip to grey screen if all the trials are done 
     win.flip()
+    out_task.stop()
 
 # then save the stim record into frankenlocal/tmp
