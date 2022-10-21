@@ -2,6 +2,7 @@ classdef AnalogOutput < signal
     properties
         type = 'analog';
         dir = 'output';
+        output
     end
     methods
         function obj = AnalogOutput(name, line)

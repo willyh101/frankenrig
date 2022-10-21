@@ -4,7 +4,7 @@ classdef DigitalOutput < signal
         type = 'digital';
         dir = 'output';
         port
-        output double
+        output
     end
 
     methods

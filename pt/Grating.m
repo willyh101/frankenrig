@@ -16,6 +16,8 @@ classdef Grating
     end
     
     methods
+        function grating = make(obj)
+        end
     end
     
 

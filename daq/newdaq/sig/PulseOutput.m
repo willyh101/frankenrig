@@ -2,15 +2,15 @@ classdef PulseOutput < handle
     properties
         daq_rate
         sweep_length
-        sweep_data
-        trig_length = 5; % ms
-        trig_starts
+        sweep
         sweep_length_samples
+        pulse_starts
+        pulse_starts_samples
     end
 
-    properties (Dependent)
+    properties (GetAccess = private)
+        trig_length = 5; % ms
         trig_length_samples
-        trig_starts_samples
     end
 
     methods
@@ -18,37 +18,23 @@ classdef PulseOutput < handle
             obj.daq_rate = daq_rate;
             obj.sweep_length = sweep_length;
             obj.sweep_length_samples = obj.daq_rate*sweep_length;
-            obj.sweep_data = zeros(1,daq_rate*sweep_length);
+            obj.sweep = zeros(1,daq_rate*sweep_length);
+        end
+
+        function samples = to_samples(obj, ms)
+            samples = ms * obj.daq_rate / 1000;
         end
 
         function tls = get.trig_length_samples(obj)
             tls = obj.daq_rate*obj.trig_length/1000;
         end
 
-        function tss = get.trig_starts_samples(obj)
-            tss = obj.trig_starts*obj.daq_rate./1000;
+        function tss = get.pulse_starts_samples(obj)
+            tss = obj.pulse_starts*obj.daq_rate./1000;
         end
 
         function resetOutput(obj)
-            obj.sweep_data = zeros(1,obj.daq_rate*obj.sweep_length);
-        end
-            
-        function addPulse(obj, trig_time)
-            trig_start_samples = trig_time * obj.daq_rate / 1000;
-            obj.trig_starts = [obj.trig_starts trig_time];
-%             trig_length_samples = obj.trig_length * obj.daq_rate / 1000;
-            obj.sweep_data(trig_start_samples:trig_start_samples+obj.trig_length_samples) = 1;
-        end
-
-        function addPulseTrain(obj, trig_times)
-            for tt=trig_times
-                obj.addPulse(tt)
-            end
-        end
-
-        function addStartTrigger(obj)
-            obj.sweep_data(1:obj.trig_length_samples) = 1;
-            obj.trig_starts = [obj.trig_starts 1/obj.daq_rate];
+            obj.sweep = zeros(1,obj.daq_rate*obj.sweep_length);
         end
 
         function show(obj, fig)
@@ -58,11 +44,30 @@ classdef PulseOutput < handle
             figure(fig)
             xs = 1:obj.sweep_length_samples;
             xs = xs/obj.daq_rate;
-            plot(xs, obj.sweep_data)
+            plot(xs, obj.sweep)
         end
 
         function d = double(obj)
-            d = obj.sweep_data;
+            d = obj.sweep;
+        end
+    end
+
+    methods (Access = private)
+        function addPulse(obj, trig_time)
+            trig_start_samples = trig_time * obj.daq_rate / 1000;
+            obj.pulse_starts = [obj.pulse_starts trig_time];
+            obj.sweep(trig_start_samples:trig_start_samples+obj.trig_length_samples-1) = 1;
+        end
+
+        function addPulseTrain(obj, trig_times)
+            for tt=trig_times
+                obj.addPulse(tt)
+            end
+        end
+
+        function addStartTrigger(obj)
+            obj.sweep(1:obj.trig_length_samples) = 1;
+            obj.pulse_starts = [obj.pulse_starts 1/obj.daq_rate];
         end
     end
 end
